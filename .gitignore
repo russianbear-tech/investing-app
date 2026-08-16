@@ -1,0 +1,18 @@
+node_modules/
+.next/
+out/
+build/
+next-env.d.ts
+*.tsbuildinfo
+
+# Secrets — never commit
+.env.local
+.env*.local
+
+# Your actual portfolio data stays local.
+# Ignore the whole folder, not named files: ad-hoc backups get names nobody
+# thought of when the pattern was written — "portfolio.pre-lots-backup.json"
+# slipped past an earlier `data/*.backup.json` rule and would have been
+# committed. Everything in here is personal data, so everything is ignored.
+data/*
+!data/.gitkeep

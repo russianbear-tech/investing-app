@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, sans-serif;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background-color: #09090b;
+  color: #e4e4e7;
+  -webkit-font-smoothing: antialiased;
+  /* Room for the fixed mobile tab bar. */
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Money and percentages line up column-wise. */
+.tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Markdown rendered from Claude's replies. */
+.prose-brief {
+  line-height: 1.7;
+}
+.prose-brief h1,
+.prose-brief h2,
+.prose-brief h3 {
+  font-weight: 600;
+  color: #fafafa;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  line-height: 1.3;
+}
+.prose-brief h1 { font-size: 1.35rem; }
+.prose-brief h2 { font-size: 1.15rem; }
+.prose-brief h3 { font-size: 1rem; }
+.prose-brief > *:first-child { margin-top: 0; }
+.prose-brief p { margin-bottom: 0.9em; }
+.prose-brief ul,
+.prose-brief ol {
+  margin: 0.75em 0;
+  padding-left: 1.35em;
+}
+.prose-brief ul { list-style: disc; }
+.prose-brief ol { list-style: decimal; }
+.prose-brief li { margin-bottom: 0.4em; padding-left: 0.15em; }
+.prose-brief strong { color: #fafafa; font-weight: 600; }
+.prose-brief em { font-style: italic; }
+.prose-brief a {
+  color: #34d399;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.prose-brief code {
+  background: #27272a;
+  padding: 0.1em 0.35em;
+  border-radius: 0.25rem;
+  font-size: 0.9em;
+}
+.prose-brief blockquote {
+  border-left: 3px solid #3f3f46;
+  padding-left: 1em;
+  color: #a1a1aa;
+  margin: 0.9em 0;
+}
+.prose-brief hr {
+  border-color: #27272a;
+  margin: 1.5em 0;
+}
+
+/* Blinking caret while a response streams in. */
+@keyframes caret {
+  0%, 45% { opacity: 1; }
+  50%, 95% { opacity: 0; }
+  100% { opacity: 1; }
+}
+.streaming-caret::after {
+  content: "▌";
+  margin-left: 1px;
+  animation: caret 1.1s steps(1) infinite;
+  color: #34d399;
+}
+
+@keyframes fade-up {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+.fade-up { animation: fade-up 0.25s ease-out; }
+
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: #3f3f46;
+  border-radius: 5px;
+  border: 2px solid #09090b;
+}
+::-webkit-scrollbar-thumb:hover { background: #52525b; }

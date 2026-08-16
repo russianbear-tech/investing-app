@@ -1,0 +1,9 @@
+# Normalise line endings in the repository.
+#
+# Without this, a file saved on one machine can come back looking entirely
+# rewritten on another purely because of invisible line-ending differences,
+# which makes it impossible to see what actually changed.
+* text=auto eol=lf
+
+# Batch files must keep Windows line endings or cmd.exe mis-parses them.
+*.bat text eol=crlf
