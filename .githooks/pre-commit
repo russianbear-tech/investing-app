@@ -1,0 +1,50 @@
+#!/bin/sh
+#
+# Refuses to commit personal data or secrets.
+#
+# This repository is public, so a mistake here is not "oops, undo it" — it is
+# financial data published to the internet and cached by other people before
+# anyone notices. .gitignore already excludes these, but .gitignore only
+# protects files nobody has explicitly added; a `git add -f`, a renamed backup,
+# or a new folder nobody thought of would sail straight through.
+#
+# Enabled with:  git config core.hooksPath .githooks
+# Bypassable with --no-verify, deliberately: it is a guard rail, not a lock.
+
+blocked=""
+
+for file in $(git diff --cached --name-only --diff-filter=ACM); do
+  case "$file" in
+    # Everything under data/ is personal, except the empty placeholder that
+    # keeps the folder present in a fresh clone.
+    data/.gitkeep)
+      ;;
+    data/*)
+      blocked="$blocked  $file  (your portfolio data)\n"
+      ;;
+    # .env.local.example is the template and is meant to be committed. Any
+    # other .env file holds a real API key.
+    *.example)
+      ;;
+    .env|.env.*|*/.env|*/.env.*)
+      blocked="$blocked  $file  (contains an API key)\n"
+      ;;
+  esac
+done
+
+if [ -n "$blocked" ]; then
+  echo ""
+  echo "COMMIT BLOCKED — these files must never be published:"
+  echo ""
+  printf "$blocked"
+  echo ""
+  echo "This repository is public. Remove them from the commit with:"
+  echo ""
+  echo "    git restore --staged <file>"
+  echo ""
+  echo "If you are certain this is intentional, re-run with --no-verify."
+  echo ""
+  exit 1
+fi
+
+exit 0

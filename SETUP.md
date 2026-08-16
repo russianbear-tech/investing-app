@@ -34,8 +34,7 @@ git clone https://github.com/russianbear-tech/investing-app.git
 
 That makes a folder called `investing-app`. You can close the window.
 
-If it asks you to sign in to GitHub, do — the repository is private, so it
-only opens for people who've been invited to it.
+You don't need a GitHub account and it won't ask you to sign in.
 
 ---
 
