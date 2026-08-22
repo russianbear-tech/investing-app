@@ -394,6 +394,19 @@ kilobytes and syncs instantly.
 
 ---
 
+## Sharing it, and how updates travel
+
+The code lives in a public GitHub repo; the data does not, and can't — `data/`
+and `.env.local` are git-ignored, and a pre-commit hook refuses to commit them
+even if something tries. Anyone who clones it gets the app empty and fills in
+their own numbers.
+
+Updates need nothing sent to anyone. Starting the app runs a `git pull` first,
+so opening it is enough to be on the current version. If that check fails —
+offline, or anything else — it starts the version already on disk rather than
+refusing to run. `update.bat` / `update.command` do the same thing without
+launching, for when you want to update and not start.
+
 ## Your data
 
 Everything lives in one file: `data/portfolio.json`. It's plain text you can open
