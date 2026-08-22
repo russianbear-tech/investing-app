@@ -255,6 +255,28 @@ full time — leave the rate blank. Every payment then goes straight against the
 balance, nothing is estimated, and the projection is simply what's left divided
 by what you pay.
 
+## The price chart on a holding
+
+Tap any holding on the Portfolio tab to expand it and you get its price
+history, with the range buttons you'd expect: **1D, 1W, 1M, 3M, 1Y, 5Y, All**.
+Hover — or drag a finger — to read the price on any given day.
+
+The line is green or red depending on which way it moved over the range you're
+looking at, and the figure under the price is the move over *that* range. On
+1D that's measured against yesterday's close, so an overnight gap counts,
+which is what a broker means by "today".
+
+A dashed amber line marks **what you paid**, so you can see at a glance
+whether you're above or below your average cost. It's hidden in two cases: when
+the price has wandered so far from your cost that including it would squash the
+chart flat, and when you bought in a different currency than the thing trades
+in — a CAD cost drawn on a USD chart would sit at a price that never existed.
+
+Some things can't be charted over short ranges. Mutual funds price once a day,
+so a fund has a single point over 1D and nothing to draw a line between — it
+says so and suggests a longer range. Cash and GICs have no ticker at all, so
+they get no chart.
+
 ## The growth chart
 
 The dashboard draws two lines, and the difference between them is the whole

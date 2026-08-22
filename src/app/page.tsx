@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import AddHoldingModal from "@/components/AddHoldingModal";
 import ContributionsPanel from "@/components/ContributionsPanel";
+import PriceChart from "@/components/PriceChart";
 import GrowthChart from "@/components/GrowthChart";
 import {
   ACCOUNT_LABELS,
@@ -461,6 +462,21 @@ export default function PortfolioPage() {
                           At least one purchase date had no exchange rate available,
                           so today&apos;s rate was used and this gain is approximate.
                         </p>
+                      )}
+
+                      {/* Cash and GICs have no ticker, so nothing to chart. */}
+                      {h.symbol && (
+                        <PriceChart
+                          symbol={h.symbol}
+                          costLine={
+                            // Only comparable when the thing was bought in the
+                            // currency it trades in; otherwise the line would sit
+                            // at a price that never existed.
+                            h.purchaseCurrency === h.nativeCurrency
+                              ? h.averageCostPerUnit
+                              : null
+                          }
+                        />
                       )}
 
                       <ContributionsPanel

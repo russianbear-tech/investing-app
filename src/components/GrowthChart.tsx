@@ -10,6 +10,7 @@ import {
 } from "react";
 import { TrendingUp, AlertTriangle } from "lucide-react";
 import { formatMoney, formatPercent, toneClass } from "@/lib/format";
+import { compactMoney, niceTicks, shortDate } from "@/lib/chart";
 
 interface HistoryPoint {
   date: string;
@@ -43,35 +44,6 @@ const PAD = { top: 16, right: 14, bottom: 26, left: 52 };
 // useLayoutEffect warns during SSR; this picks the right one per environment so
 // the first paint is already at the measured width.
 const useIsoLayoutEffect = typeof window !== "undefined" ? useLayoutEffect : useEffect;
-
-/** Ticks on round numbers (1/2/5 × 10ⁿ) rather than raw data bounds. */
-function niceTicks(min: number, max: number, count = 4): number[] {
-  if (!Number.isFinite(min) || !Number.isFinite(max) || max <= min) return [min];
-  const raw = (max - min) / count;
-  const mag = 10 ** Math.floor(Math.log10(raw));
-  const norm = raw / mag;
-  const step = (norm >= 5 ? 10 : norm >= 2 ? 5 : norm >= 1 ? 2 : 1) * mag;
-  const first = Math.ceil(min / step) * step;
-  const ticks: number[] = [];
-  for (let t = first; t <= max + step * 0.01; t += step) ticks.push(t);
-  return ticks;
-}
-
-function compactMoney(v: number, currency: string): string {
-  const abs = Math.abs(v);
-  if (abs >= 1_000_000) return `${(v / 1_000_000).toFixed(1)}M`;
-  if (abs >= 1_000) return `${Math.round(v / 1000)}k`;
-  return formatMoney(v, currency, { compact: true }).replace(/\.00$/, "");
-}
-
-function shortDate(iso: string, span: number): string {
-  const d = new Date(`${iso}T00:00:00Z`);
-  return d.toLocaleDateString("en-CA", {
-    month: "short",
-    ...(span <= 120 ? { day: "numeric" } : {}),
-    timeZone: "UTC",
-  });
-}
 
 export default function GrowthChart() {
   const [range, setRange] = useState<string>("6m");

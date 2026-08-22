@@ -202,3 +202,111 @@ export async function getHistory(
     return [];
   }
 }
+
+export type PriceRange = "1d" | "1w" | "1m" | "3m" | "1y" | "5y" | "all";
+
+export interface PricePoint {
+  /** Epoch milliseconds — intraday ranges need more than a date. */
+  t: number;
+  close: number;
+}
+
+export interface PriceSeries {
+  symbol: string;
+  currency: string;
+  range: PriceRange;
+  points: PricePoint[];
+  /**
+   * The reference the range's change is measured against. For 1d that's the
+   * previous close, so an overnight gap counts — matching what every broker
+   * shows as "today". For longer ranges it's the first point in the window.
+   */
+  baseline: number | null;
+}
+
+/**
+ * How far back to ask for, and at what granularity.
+ *
+ * Yahoo only keeps fine-grained bars for a short window — minute data for
+ * about a week, 5-minute for around two months — so the interval has to widen
+ * with the range or the request comes back empty.
+ */
+type ChartInterval = "5m" | "30m" | "1d" | "1wk" | "1mo";
+
+const RANGE_SPEC: Record<PriceRange, { days: number; interval: ChartInterval }> = {
+  "1d": { days: 5, interval: "5m" },
+  "1w": { days: 8, interval: "30m" },
+  "1m": { days: 32, interval: "1d" },
+  "3m": { days: 95, interval: "1d" },
+  "1y": { days: 370, interval: "1d" },
+  "5y": { days: 1835, interval: "1wk" },
+  all: { days: 365 * 40, interval: "1mo" },
+};
+
+/**
+ * Price history for one symbol over `range`, for the chart on an expanded
+ * holding.
+ *
+ * Cached briefly: flipping between ranges and re-opening the same holding is
+ * the normal way this gets used, and each miss is a network round trip.
+ */
+const seriesCache = new Map<string, { at: number; series: PriceSeries }>();
+const SERIES_TTL_MS = 60_000;
+
+export async function getPriceSeries(
+  symbol: string,
+  range: PriceRange
+): Promise<PriceSeries | null> {
+  const sym = symbol.trim().toUpperCase();
+  if (!sym) return null;
+
+  const key = `${sym}:${range}`;
+  const hit = seriesCache.get(key);
+  if (hit && Date.now() - hit.at < SERIES_TTL_MS) return hit.series;
+
+  const spec = RANGE_SPEC[range];
+  try {
+    const period1 = new Date(Date.now() - spec.days * 86_400_000);
+    const res = (await yf.chart(
+      sym,
+      { period1, interval: spec.interval },
+      LENIENT
+    )) as {
+      quotes?: { date?: unknown; close?: unknown }[];
+      meta?: Record<string, unknown>;
+    };
+
+    let points: PricePoint[] = (res?.quotes ?? [])
+      .map((row) => ({
+        t: row.date instanceof Date ? row.date.getTime() : Date.parse(String(row.date)),
+        close: toNum(row.close),
+      }))
+      .filter((p): p is PricePoint => Number.isFinite(p.t) && p.close !== undefined)
+      .sort((a, b) => a.t - b.t);
+
+    if (points.length === 0) return null;
+
+    const meta = res?.meta ?? {};
+    const currency =
+      typeof meta.currency === "string" ? meta.currency.toUpperCase() : "USD";
+    const previousClose = toNum(meta.chartPreviousClose) ?? toNum(meta.previousClose);
+
+    let baseline: number | null;
+    if (range === "1d") {
+      // Keep only the latest session. Asking for five days covers weekends and
+      // holidays, when "today" has no bars of its own at all.
+      const lastDay = new Date(points[points.length - 1].t).toDateString();
+      points = points.filter((p) => new Date(p.t).toDateString() === lastDay);
+      baseline = previousClose ?? points[0]?.close ?? null;
+    } else {
+      baseline = points[0]?.close ?? null;
+    }
+
+    const series: PriceSeries = { symbol: sym, currency, range, points, baseline };
+    seriesCache.set(key, { at: Date.now(), series });
+    return series;
+  } catch (err) {
+    console.error(`[market] price series failed for ${sym} (${range}):`, err);
+    return null;
+  }
+}
