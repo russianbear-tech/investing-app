@@ -72,12 +72,14 @@ To start it again another day, double-click the same file.
 
 ## 4. Getting updates
 
-When there's a new version, double-click:
+**Nothing to do.** Every time you start the app it checks for a new version
+first and picks one up if there is one. Just open it as usual.
 
-- **`update.bat`** on Windows
-- **`update.command`** on Mac
+If you're offline, or the check can't reach the internet for any reason, it
+quietly starts the version you already have rather than refusing to run.
 
-It fetches the changes and installs anything new. Then start the app as usual.
+There's also **`update.bat`** (Windows) and **`update.command`** (Mac) if you
+ever want to update without starting the app. You won't normally need them.
 
 You never need to be sent files, and updating never touches what you've
 entered.
